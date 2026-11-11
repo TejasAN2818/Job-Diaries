@@ -68,17 +68,19 @@ function Desktop_Login_check({ onComplete }) {
 
   // ============================================================
   // MOBILE NUMBER INPUT
-  // Accepts any text, numbers, country codes and special characters.
-  // No length or format restriction.
+  // Allows digits, + and spaces only.
+  // Supports country codes such as +91 9876543210.
   // ============================================================
 
   const handlePhoneChange = (e) => {
-    setPhoneNo(e.target.value)
+    const numericValue = e.target.value.replace(/[^0-9+ ]/g, '')
+
+    setPhoneNo(numericValue)
     clearError()
   }
 
   // ============================================================
-  // SUBMIT — REQUIRED FIELDS ONLY
+  // SUBMIT — REQUIRED FIELD VALIDATION
   // ============================================================
 
   const handleSubmit = (e) => {
@@ -101,7 +103,14 @@ function Desktop_Login_check({ onComplete }) {
       return
     }
 
-    if (!cleanLocation) {
+    // Allow digits, spaces and one optional + at the beginning.
+    if (!/^\+?[0-9 ]+$/.test(cleanPhone)) {
+      setError('Please enter a valid mobile number.')
+      setButtonEscaped(false)
+      return
+    }
+
+    if (!currentLocation.trim()) {
       setError('Please enter your current location.')
       setButtonEscaped(false)
       return
@@ -276,8 +285,9 @@ function Desktop_Login_check({ onComplete }) {
                   </svg>
 
                   <input
-                    type="text"
-                    inputMode="text"
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9+ ]*"
                     value={phoneNo}
                     onChange={handlePhoneChange}
                     placeholder="Enter mobile number"
@@ -352,10 +362,7 @@ function Desktop_Login_check({ onComplete }) {
               {/* GENDER */}
               <div className="sm:col-span-2">
                 <label className={labelClass}>
-                  Gender
-                  <span className="ml-1 text-[10px] text-blue-400">
-                    (Optional)
-                  </span>
+                  Gender <span className="ml-1 text-[10px] text-blue-400">(Optional)</span>
                 </label>
 
                 <div className="relative">
@@ -398,7 +405,7 @@ function Desktop_Login_check({ onComplete }) {
               {error || ' '}
             </div>
 
-            {/* SMALL LOGIN BUTTON */}
+            {/* LOGIN BUTTON */}
             <div className="relative mt-4 flex min-h-[38px] justify-center">
               <button
                 type="submit"

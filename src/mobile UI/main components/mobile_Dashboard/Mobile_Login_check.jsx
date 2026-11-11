@@ -22,12 +22,14 @@ function Mobile_Login_check({ onComplete }) {
 
   // ============================================================
   // MOBILE NUMBER INPUT
-  // Accepts any text, numbers, country codes and special characters.
-  // No length or format restriction.
+  // Allows digits, + and spaces only.
+  // Supports country codes such as +91 9876543210.
   // ============================================================
 
   const handlePhoneChange = (e) => {
-    setPhoneNo(e.target.value)
+    const numericValue = e.target.value.replace(/[^0-9+ ]/g, '')
+
+    setPhoneNo(numericValue)
     setError('')
   }
 
@@ -50,6 +52,12 @@ function Mobile_Login_check({ onComplete }) {
 
     if (!cleanPhone) {
       setError('Please enter your mobile number.')
+      return
+    }
+
+    // Allow digits, spaces and one optional + at the beginning.
+    if (!/^\+?[0-9 ]+$/.test(cleanPhone)) {
+      setError('Please enter a valid mobile number.')
       return
     }
 
@@ -123,11 +131,12 @@ function Mobile_Login_check({ onComplete }) {
         shadow-[0_12px_35px_rgba(37,99,180,0.30)]
         animate-[loginAppear_0.3s_ease-out]
       ">
+
         {/* TOP ACCENT */}
         <div className="
           h-[3px] shrink-0 w-full
           bg-gradient-to-r
-          from-blue-400 via-blue-300 to-black-400
+          from-blue-400 via-blue-300 to-black
         " />
 
         {/* COMPACT CONTENT */}
@@ -235,7 +244,7 @@ function Mobile_Login_check({ onComplete }) {
                   aria-hidden="true"
                 >
                   <path
-                    d="M7 3h3l2 5-2 2a15 15 0 0 0 4 4l2-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 5 5a2 2 0 0 1-2-2Z"
+                    d="M7 3h3l2 5-2 2a15 15 0 0 0 4 4l2-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 5 5a2 2 0 0 1 2-2Z"
                     stroke="currentColor"
                     strokeWidth="1.7"
                     strokeLinecap="round"
@@ -244,8 +253,9 @@ function Mobile_Login_check({ onComplete }) {
                 </svg>
 
                 <input
-                  type="text"
-                  inputMode="text"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9+ ]*"
                   value={phoneNo}
                   onChange={handlePhoneChange}
                   placeholder="Enter mobile number"
@@ -427,7 +437,7 @@ function Mobile_Login_check({ onComplete }) {
                 group-hover:translate-x-full
               " />
 
-              <span className="relative">Login</span>
+              <span className="relative">Continue</span>
 
               <svg
                 viewBox="0 0 24 24"
