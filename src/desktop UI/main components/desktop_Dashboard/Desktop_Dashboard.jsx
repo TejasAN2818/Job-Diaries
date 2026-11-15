@@ -128,64 +128,55 @@ function Desktop_Dashboard() {
   const profileSyncStarted =
     useRef(false)
 
-  useEffect(() => {
-    if (profileSyncStarted.current) {
-      return
-    }
+  
+useEffect(() => {
+  if (profileSyncStarted.current) {
+    return
+  }
 
-    profileSyncStarted.current = true
+  profileSyncStarted.current = true
 
-    const profileData =
-      getProfileData()
+  const profileData = getProfileData()
 
-    const hasName =
-      String(
-        profileData?.name || ''
-      ).trim() !== ''
+  const hasName =
+    String(profileData?.name || '').trim() !== ''
 
-    const hasPhone =
-      String(
-        profileData?.phoneNo || ''
-      ).trim() !== ''
+  const hasPhone =
+    String(profileData?.phoneNo || '').trim() !== ''
 
-    const hasLocation =
-      String(
-        profileData?.currentLocation || ''
-      ).trim() !== ''
+  const hasLocation =
+    String(profileData?.currentLocation || '').trim() !== ''
 
-    if (
-      !hasName ||
-      !hasPhone ||
-      !hasLocation
-    ) {
-      setShowLoginCheck(true)
-      return
-    }
+  // IMPORTANT:
+  // Never show the profile popup when the website opens.
+  // Only synchronize an existing complete profile.
 
-    setShowLoginCheck(false)
+  if (!hasName || !hasPhone || !hasLocation) {
+    return
+  }
 
-    autoSyncProfileToGoogleSheet(
-      getProfileData
-    )
-      .then(result => {
-        if (result?.success) {
-          console.log(
-            'Saved profile automatically synchronized with Google Sheet.'
-          )
-        } else if (!result?.skipped) {
-          console.error(
-            'Automatic Google Sheet profile sync failed:',
-            result?.error
-          )
-        }
-      })
-      .catch(error => {
-        console.error(
-          'Automatic Google Sheet profile sync error:',
-          error
+  autoSyncProfileToGoogleSheet(getProfileData)
+    .then(result => {
+      if (result?.success) {
+        console.log(
+          'Saved profile automatically synchronized with Google Sheet.'
         )
-      })
-  }, [])
+      } else if (!result?.skipped) {
+        console.error(
+          'Automatic Google Sheet profile sync failed:',
+          result?.error
+        )
+      }
+    })
+    .catch(error => {
+      console.error(
+        'Automatic Google Sheet profile sync error:',
+        error
+      )
+    })
+
+}, [])
+
 
   const [
     selectedFilters,

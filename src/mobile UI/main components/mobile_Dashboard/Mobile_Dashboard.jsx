@@ -156,119 +156,52 @@ function Mobile_Dashboard() {
   // ============================================================
 
   useEffect(() => {
+  // Prevent duplicate initial sync
+  if (profileSyncStarted.current) {
+    return
+  }
 
-    // ----------------------------------------------------------
-    // PREVENT DUPLICATE INITIAL SYNC
-    // ----------------------------------------------------------
+  profileSyncStarted.current = true
 
-    if (profileSyncStarted.current) {
-      return
-    }
+  // Get existing profile
+  const profileData = getProfileData()
 
-    profileSyncStarted.current = true
+  const hasName =
+    String(profileData?.name || '').trim() !== ''
 
+  const hasPhone =
+    String(profileData?.phoneNo || '').trim() !== ''
 
-    // ----------------------------------------------------------
-    // GET PROFILE
-    // ----------------------------------------------------------
+  const hasLocation =
+    String(profileData?.currentLocation || '').trim() !== ''
 
-    const profileData =
-      getProfileData()
+  // Do not show the profile popup when the website opens.
+  // Only sync if the user already has a complete profile.
+  if (!hasName || !hasPhone || !hasLocation) {
+    return
+  }
 
-
-    // ----------------------------------------------------------
-    // CHECK REQUIRED PROFILE FIELDS
-    // ----------------------------------------------------------
-
-    const hasName =
-      String(
-        profileData?.name || ''
-      ).trim() !== ''
-
-
-    const hasPhone =
-      String(
-        profileData?.phoneNo || ''
-      ).trim() !== ''
-
-
-    const hasLocation =
-      String(
-        profileData?.currentLocation || ''
-      ).trim() !== ''
-
-
-    // ==========================================================
-    // FIRST VISIT
-    // ==========================================================
-
-    if (
-      !hasName ||
-      !hasPhone ||
-      !hasLocation
-    ) {
-
-      setShowLoginCheck(true)
-
-      return
-    }
-
-
-    // ==========================================================
-    // EXISTING PROFILE
-    // ==========================================================
-    //
-    // Profile already exists.
-    //
-    // Do NOT show login form.
-    //
-    // Automatically synchronize the saved profile
-    // with Google Sheet.
-    //
-    // The useRef above guarantees this automatic
-    // synchronization starts only once.
-    //
-    // ==========================================================
-
-    setShowLoginCheck(false)
-
-
-    autoSyncProfileToGoogleSheet(
-      getProfileData
-    )
-      .then((result) => {
-
-        if (
-          result?.success
-        ) {
-
-          console.log(
-            'Saved profile automatically synchronized with Google Sheet.'
-          )
-
-        } else if (
-          !result?.skipped
-        ) {
-
-          console.error(
-            'Automatic Google Sheet profile sync failed:',
-            result?.error
-          )
-
-        }
-
-      })
-      .catch((error) => {
-
-        console.error(
-          'Automatic Google Sheet profile sync error:',
-          error
+  // Automatically sync existing profile with Google Sheet
+  autoSyncProfileToGoogleSheet(getProfileData)
+    .then((result) => {
+      if (result?.success) {
+        console.log(
+          'Saved profile automatically synchronized with Google Sheet.'
         )
-
-      })
-
-
-  }, [])
+      } else if (!result?.skipped) {
+        console.error(
+          'Automatic Google Sheet profile sync failed:',
+          result?.error
+        )
+      }
+    })
+    .catch((error) => {
+      console.error(
+        'Automatic Google Sheet profile sync error:',
+        error
+      )
+    })
+}, [])
 
 
   // ============================================================
